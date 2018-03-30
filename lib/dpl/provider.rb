@@ -32,6 +32,7 @@ module DPL
       'Firebase'            => 'firebase',
       'GAE'                 => 'gae',
       'GCS'                 => 'gcs',
+      'GoogleDrive'         => 'google_drive',
       'Hackage'             => 'hackage',
       'Heroku'              => 'heroku',
       'Lambda'              => 'lambda',
