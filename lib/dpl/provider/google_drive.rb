@@ -39,9 +39,13 @@ project --> root directory da caricare in drive
         shared_dir = session.file_by_name(shared)
       end
 
-      def dir_content
-        # Returns a FLAT array with all the files in the target directory 
+      def all_files
+        # Returns a FLAT array with all the files (as path) in the target directory
         Dir["#{project}/**/*"]
+      end
+      def all_directories
+        # Returns a FLAT array with all the directories (as path) in the target directory
+        Dir["#{project}/**/"]
       end
 
       def shared
