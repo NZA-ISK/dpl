@@ -39,6 +39,11 @@ project --> root directory da caricare in drive
         shared_dir = session.file_by_name(shared)
       end
 
+      def dir_content
+        # Returns a FLAT array with all the files in the target directory 
+        Dir["#{project}/**/*"]
+      end
+
       def shared
         options[:shared]
       end
