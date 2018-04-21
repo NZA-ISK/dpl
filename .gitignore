@@ -13,3 +13,4 @@ stubs
 vendor
 service.json
 .idea/
+prove/

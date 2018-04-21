@@ -1,7 +1,3 @@
-require 'time'
-require 'google_drive'
-require 'zip'
-
 module DPL
 =begin
 Initial step:
@@ -14,6 +10,9 @@ ENV VARS
 SCRIPT VARS
   shared --> shared dir
   project --> root dir to upload in Google Drive
+  strategy [remove|history] --> the strategy you want to use to upload the directory
+    remove --> always mantain one directory and every time remove the old one
+    history --> create a new directory with a uniq timestamp every time
 
 METHODS
 Collection.create_subcollection // crea cartella
@@ -29,7 +28,7 @@ collection_by_title("dir").upload_from_file("file") rescue create_subcollection(
         File.open(file_name, 'w') do |f|
           f.write(context.env['GDRIVE_SERVICE_ACCOUNT'])
         end
-        GoogleDrive::Session.from_service_account_key(file_name)
+        ::GoogleDrive::Session.from_service_account_key(file_name)
       end
 
       def check_auth
@@ -41,24 +40,35 @@ collection_by_title("dir").upload_from_file("file") rescue create_subcollection(
       end
 
       def drive_root
-        shared_dir = session.file_by_name(shared)
+        session.file_by_name(shared)
       end
 
       def all_files
         # Returns a FLAT array with all the files (as path) in the target directory
         Dir["#{project}/**/*"]
       end
-      def all_directories
-        # Returns a FLAT array with all the directories (as path) in the target directory
-        Dir["#{project}/**/"]
+
+      def strategies
+        %w(remove history)
+      end
+
+      def remove_strategy
+        drive_root.remove(drive_root.file_by_name('build'))
+        drive_root.create_subcollection('build')
+      end
+
+      def history_strategy
+        drive_root.create_subcollection(Time.now.strftime('%Y-%m-%d-%H-%M-%S'))
+      end
+
+      def strategy
+        strategies.include?options[:strategy] ?
+         (options[:strategy]) :
+         (raise Error, "Please use one of (#{strategies.join(' ')}) instead of #{options[:strategy]}")
       end
 
       def shared
         options[:shared]
-      end
-
-      def zipped
-        options[:zip] || false
       end
 
       def check_app
@@ -66,10 +76,19 @@ collection_by_title("dir").upload_from_file("file") rescue create_subcollection(
         raise Error, "Please set a 'shared' folder path under 'deploy' in .travis.yml" if drive_root.nil?
       end
 
+      def push_file(working_dir, file)
+        dirs = file.split('/')
+        relative_dir = working_dir
+        dirs[0...-1].each do |dir|
+          clean_dir = dir.gsub(project, '')
+          relative_dir = relative_dir.file_by_name(clean_dir) || relative_dir.create_subcollection(clean_dir)
+        end
+        relative_dir.upload_from_file(file) unless File.directory?file
+      end
+
       def push_app
-        # TODO: implementare algoritmo ricorsione
-        # session.file_by_title("nome_cartella").upload_from_file("wewe")
-        # TODO: deploy the code
+        working_dir = (options[:strategy].eql?'history') ? history_strategy : remove_strategy
+        all_files.each { |file| push_file(working_dir, file) }
       end
 
       def needs_key?

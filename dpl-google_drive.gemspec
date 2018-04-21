@@ -1,3 +1,3 @@
 require './gemspec_helper'
 
-gemspec_for 'engine_yard', [['google-drive-ruby', '^2.1.9']]
+gemspec_for 'google_drive', [['google-drive-ruby', '2.1.9']]
