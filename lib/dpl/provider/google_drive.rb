@@ -4,17 +4,16 @@ require 'zip'
 
 module DPL
 =begin
-Step per funzionare:
-  1) Creare un service account
-  2) Condivedere una cartella del proprio drive con il service account
+Initial step:
+  1) create a Google Service Account
+  2) share a Google Drive dir with the Service Account
 
 ENV VARS
-GDRIVE_SERVICE_ACCOUNT --> stringa json criptata credenziali service account
---> (encrypted via "travis encrypt" command line tool)
+  GDRIVE_SERVICE_ACCOUNT --> encrypted Service Account credential in json format (encrypted via "travis encrypt" command line tool)
 
 SCRIPT VARS
-shared --> directory condivisa con il service account
-project --> root directory da caricare in drive
+  shared --> shared dir
+  project --> root dir to upload in Google Drive
 
 =end
   class Provider
