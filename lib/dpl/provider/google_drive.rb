@@ -16,6 +16,12 @@ SCRIPT VARS
 shared --> directory condivisa con il service account
 project --> root directory da caricare in drive
 
+METHODS
+Collection.create_subcollection // crea cartella
+upload_from_file // upload file
+collection_by_title // trova la cartella dal nome
+collection_by_title("dir").upload_from_file("file") rescue create_subcollection("dir").upload_from_file("file")
+
 =end
   class Provider
     class GoogleDrive < Provider
@@ -71,4 +77,5 @@ project --> root directory da caricare in drive
         false
       end
     end
+  end
 end
