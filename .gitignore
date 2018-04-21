@@ -11,3 +11,5 @@ npm-debug.log
 *.gem
 stubs
 vendor
+service.json
+.idea/

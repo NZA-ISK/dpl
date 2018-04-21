@@ -15,6 +15,12 @@ SCRIPT VARS
   shared --> shared dir
   project --> root dir to upload in Google Drive
 
+METHODS
+Collection.create_subcollection // crea cartella
+upload_from_file // upload file
+collection_by_title // trova la cartella dal nome
+collection_by_title("dir").upload_from_file("file") rescue create_subcollection("dir").upload_from_file("file")
+
 =end
   class Provider
     class GoogleDrive < Provider
@@ -70,4 +76,5 @@ SCRIPT VARS
         false
       end
     end
+  end
 end
