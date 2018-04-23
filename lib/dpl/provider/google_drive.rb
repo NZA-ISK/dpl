@@ -1,3 +1,4 @@
+require 'google_drive'
 module DPL
 =begin
 Initial step:
@@ -5,7 +6,7 @@ Initial step:
   2) share a Google Drive dir with the Service Account
 
 ENV VARS
-  GDRIVE_SERVICE_ACCOUNT --> encrypted Service Account credential in json format (encrypted via "travis encrypt" command line tool)
+  GoogleDrive_SERVICE_ACCOUNT --> encrypted Service Account credential in json format (encrypted via "travis encrypt" command line tool)
 
 SCRIPT VARS
   shared --> shared dir
@@ -24,15 +25,16 @@ collection_by_title("dir").upload_from_file("file") rescue create_subcollection(
   class Provider
     class GoogleDrive < Provider
       def session
-        file_name = "#{Time.now.to_i}.json"
-        File.open(file_name, 'w') do |f|
-          f.write(context.env['GDRIVE_SERVICE_ACCOUNT'])
-        end
-        ::GoogleDrive::Session.from_service_account_key(file_name)
+        @session
       end
 
       def check_auth
-        raise Error, "Please add GDRIVE_SERVICE_ACCOUNT in Travis settings" unless context.env['GDRIVE_SERVICE_ACCOUNT']
+        raise Error, "Please add GoogleDrive_SERVICE_ACCOUNT in Travis settings" unless context.env['GoogleDrive_SERVICE_ACCOUNT']
+        file_name = "#{Time.now.to_i}.json"
+        File.open(file_name, 'w') do |f|
+          f.write(context.env['GoogleDrive_SERVICE_ACCOUNT'])
+        end
+        @session = ::GoogleDrive::Session.from_service_account_key(file_name) rescue raise Error, 'Service account not valid'
       end
 
       def project
@@ -40,7 +42,7 @@ collection_by_title("dir").upload_from_file("file") rescue create_subcollection(
       end
 
       def drive_root
-        session.file_by_name(shared)
+        session.file_by_name(shared) || raise Error, "Shared folder specified does not exist in your drive workspace"
       end
 
       def all_files
@@ -62,9 +64,7 @@ collection_by_title("dir").upload_from_file("file") rescue create_subcollection(
       end
 
       def strategy
-        strategies.include?options[:strategy] ?
-         (options[:strategy]) :
-         (raise Error, "Please use one of (#{strategies.join(' ')}) instead of #{options[:strategy]}")
+        options[:strategy]
       end
 
       def shared
@@ -72,8 +72,9 @@ collection_by_title("dir").upload_from_file("file") rescue create_subcollection(
       end
 
       def check_app
-        raise Error, "Please set a 'project' folder path under 'deploy' in .travis.yml" unless File.directory?(project)
+        raise Error, "Please set a valid 'project' folder path under 'deploy' in .travis.yml" unless File.directory?(project)
         raise Error, "Please set a 'shared' folder path under 'deploy' in .travis.yml" if drive_root.nil?
+        raise Error, "Please use one of (#{strategies.join(' ')}) instead of #{options[:strategy]}" unless strategies.include?options[:strategy]
       end
 
       def push_file(working_dir, file)
