@@ -137,8 +137,8 @@ describe DPL::Provider::GoogleDrive do
       allow(working_dir).to receive(:upload_from_file){|arg| provider.context.shell "uploading #{arg}"}
       allow(::File).to receive(:file?).and_return(true)
       expect(provider.context).to receive(:shell).with('creating dir2')
-      expect(provider.context).to receive(:shell).with('uploading dir1/dir2/file')
-      provider.push_file(working_dir, 'dir1/dir2/file')
+      expect(provider.context).to receive(:shell).with("uploading #{provider.project}/dir1/dir2/file")
+      provider.push_file(working_dir, "#{provider.project}/dir1/dir2/file")
     end
   end
 

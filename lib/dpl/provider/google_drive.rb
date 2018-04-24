@@ -83,11 +83,11 @@ collection_by_title("dir").upload_from_file("file") rescue create_subcollection(
       end
 
       def push_file(working_dir, file)
-        dirs = file.split('/')
+        relative_path = file.gsub(project, '')
+        dirs = relative_path.split('/')
         relative_dir = working_dir
-        dirs[0...-1].each do |dir|
-          clean_dir = dir.gsub(project, '')
-          relative_dir = (relative_dir.file_by_name(clean_dir) || relative_dir.create_subcollection(clean_dir))
+        dirs[0...-1].select{|dir| dir != ''}.each do |dir|
+          relative_dir = (relative_dir.file_by_name(dir) || relative_dir.create_subcollection(dir))
         end
         relative_dir.upload_from_file(file) if File.file?file
       end
