@@ -36,6 +36,7 @@ collection_by_title("dir").upload_from_file("file") rescue create_subcollection(
             f.write(context.env['GOOGLE_DRIVE_SERVICE_ACCOUNT'])
           end
           @session = ::GoogleDrive::Session.from_service_account_key(file_name)
+          File.delete(file_name)
         rescue
           raise Error, 'Service account not valid'
         end
