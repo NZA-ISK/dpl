@@ -46,7 +46,7 @@ collection_by_title("dir").upload_from_file("file") rescue create_subcollection(
       end
 
       def drive_root
-        session.file_by_name(shared) || (raise Error, "Shared folder specified does not exist in your drive workspace")
+        session.file_by_name(shared) || (raise Error, 'Specified shared folder does not exist in your drive workspace')
       end
 
       def all_files
@@ -86,13 +86,13 @@ collection_by_title("dir").upload_from_file("file") rescue create_subcollection(
         relative_dir = working_dir
         dirs[0...-1].each do |dir|
           clean_dir = dir.gsub(project, '')
-          relative_dir = relative_dir.file_by_name(clean_dir) || relative_dir.create_subcollection(clean_dir)
+          relative_dir = (relative_dir.file_by_name(clean_dir) || relative_dir.create_subcollection(clean_dir))
         end
-        relative_dir.upload_from_file(file) unless File.directory?file
+        relative_dir.upload_from_file(file) if File.file?file
       end
 
       def push_app
-        working_dir = (options[:strategy].eql?'history') ? history_strategy : remove_strategy
+        working_dir = ((strategy.eql?'history') ? history_strategy : remove_strategy)
         all_files.each { |file| push_file(working_dir, file) }
       end
 
